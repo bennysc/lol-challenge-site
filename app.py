@@ -22,40 +22,40 @@ teams = [
         "id": 1,
         "name": "blue",
         "members": [
-            {"name": "gorp", "tag": "grubs"},
-            {"name": "Big Beak", "tag": "beak"},
+            {"realname":"Benny","name": "gorp", "tag": "grubs"},
+            {"realname":"Surge","name": "Big Beak", "tag": "beak"},
         ],
     },
     {
         "id": 2,
         "name": "red",
         "members": [
-            {"name": "Rank1Azir", "tag": "8182"},
-            {"name": "AnaSecretAdmirer", "tag": "885"},
+            {"realname":"Draco","name": "Rank1Azir", "tag": "8182"},
+            {"realname":"BP","name": "AnaSecretAdmirer", "tag": "885"},
         ],
     },
     {
         "id": 3,
         "name": "green",
         "members": [
-            {"name": "BennyGoatBAAAH", "tag": "NA3"},
-            {"name": "CantHandicapMe", "tag": "CALVN"},
+            {"realname":"Calvin","name": "BennyGoatBAAAH", "tag": "NA3"},
+            {"realname":"Sam","name": "CantHandicapMe", "tag": "CALVN"},
         ],
     },
     {
         "id": 4,
         "name": "yellow",
         "members": [
-            {"name": "Monoler", "tag": "NA1"},
-            {"name": "Mitooma", "tag": "NA1"},
+            {"realname":"EJ","name": "Monoler", "tag": "NA1"},
+            {"realname":"Edwin","name": "Mitooma", "tag": "NA1"},
         ],
     },
     {
         "id": 5,
         "name": "purple",
         "members": [
-            {"name": "BennysBonita", "tag": "Benny"},
-            {"name": "Odegurd", "tag": "NA1"},
+            {"realname":"Raythar","name": "BennysBonita", "tag": "Benny"},
+            {"realname":"Snivel","name": "Odegurd", "tag": "NA1"},
         ],
     },
 ]
@@ -176,8 +176,10 @@ for team in teams:
     # )
     wins = []
     losses = []
+    teamdata = []
     for member in team["members"]:
         fullname = get_fullname(member["name"], member["tag"])
+        realname = member["realname"]
         op_gg = get_opgg(member["name"], member["tag"])
         account = get_account(member["name"], member["tag"])
         matches = get_matches(account["puuid"])
@@ -193,17 +195,23 @@ for team in teams:
         wins.append(win)
         losses.append(loss)
         wr = win / (win + loss) if win + loss > 0 else 0
-        data.append(
+        teamdata.append(
             {
-                "name": fullname,
-                "op.gg": op_gg,
+                "name": realname,
+                "opgg": op_gg,
                 "wins": win,
                 "losses": loss,
                 "winrate": wr,
                 "rank": get_rank_string(account),
-                "LP":get_lp(account)  
+                "lp":get_lp(account)  
             }
         )
+    avg_lp = sum([d["LP"] for d in teamdata]) / len(teamdata)
+    team_description = f"{teamdata[0]['name']} and {teamdata[1]['name']}"
+    for d in teamdata:
+        d["avg_lp"] = avg_lp
+        d["team"] = team_description
+    data.extend(teamdata)
     mean_wins = np.mean(wins)
     mean_losses = np.mean(losses)
     if mean_wins + mean_losses == 0:
@@ -214,13 +222,13 @@ for team in teams:
     # st.text(f"Losses: {mean_losses}")
     # st.text(f"Winrate: {winrate}")
 
-df = pd.DataFrame(data).sort_values("LP", ascending=False)
+df = pd.DataFrame(data).sort_values("avg_lp", ascending=False)
 
 st.dataframe(
     df,
     column_config={
         "account_data": {"max_width": 200},
-        "op.gg": st.column_config.LinkColumn(),
+        "opgg": st.column_config.LinkColumn(),
     },
 )
 
