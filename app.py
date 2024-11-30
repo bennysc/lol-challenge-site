@@ -120,12 +120,17 @@ def get_rank_string_from_lp(lp):
     sorted_ranks = sorted(RANK_MAPPING.items(), key=lambda x: x[1])
     for k, v in sorted_ranks:
         if lp > v and lp < v + 400:
+            
             remaining_lp = lp - v
+            print(k,v,remaining_lp)
             tier = k
             sorted_tiers = sorted(TIER_MAPPING.items(), key=lambda x: x[1])
-            for k, v in sorted_tiers:
-                if remaining_lp > v and remaining_lp < v + 100:
-                    return f"{tier} {k} {remaining_lp - v}LP"
+            for k2, v2 in sorted_tiers:
+                print(k2,v2)
+                if remaining_lp > v2 and remaining_lp < v2 + 100:
+                    print("found")
+                    return f"{tier} {k2} {remaining_lp - v2}LP"
+    return "UNRANKED"
 
 RANK_MAPPING = {
     "IRON": 0,
@@ -249,8 +254,10 @@ for team in teams:
     losses = []
     remakes = []
     teamdata = []
-    member_counter = 0
     avg_team_rank = 0
+    avg_team_rank_str = ""
+    member_counter = 0
+    avg_ranks = []
     for member in team["members"]:
         fullname = get_fullname(member["name"], member["tag"])
         realname = member["realname"]
@@ -269,7 +276,6 @@ for team in teams:
         max_cs_adv_on_lane_opponents = []
         gold_per_minutes = []
         counter = 0
-        avg_ranks = []
         for dto in matches:
             duration_seconds = get_duration_seconds(dto)
             if duration_seconds > 210:
@@ -312,6 +318,13 @@ for team in teams:
         wr = win / (win + loss) if win + loss > 0 else 0
         print(avg_ranks)
         avg_team_rank = np.mean(avg_ranks)
+        if len(avg_ranks) == 0:
+            avg_team_rank_str = "UNRANKED"
+        else:
+            print(avg_team_rank)
+            print(int(avg_team_rank))
+            avg_team_rank_str = get_rank_string_from_lp(int(avg_team_rank))
+        
         if len(durations) == 0:
             avg_duration = 0
         else:
@@ -349,11 +362,12 @@ for team in teams:
         est_time = "No matches"
     avg_lp = sum([d["lp"] for d in teamdata]) / len(teamdata)
     team_description = f"{teamdata[0]['name']} and {teamdata[1]['name']}"
+    print(avg_team_rank_str)
     for d in teamdata:
         d["avg_lp"] = avg_lp
         d["team"] = team_description
         d["last_match"] = est_time
-        d["avg_team_rank"] = avg_team_rank
+        d["avg_game_rank"] = avg_team_rank_str
     data.extend(teamdata)
     mean_wins = np.mean(wins)
     mean_losses = np.mean(losses)
