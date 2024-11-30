@@ -89,6 +89,39 @@ def get_league_data(summoner):
     return lol_watcher.league.by_summoner(my_region, summoner["id"])
 
 
+@st.cache_data
+def get_league_data_by_summoner_id(summoner_id):
+    return lol_watcher.league.by_summoner(my_region, summoner_id)
+
+def get_avg_rank(match_dto):
+    team_lps = []
+    for participant in match_dto["info"]["participants"]:
+        summoner_id = match_dto["info"]["participants"][0]['summonerId']
+        import time
+        # wait .25 seconds
+        time.sleep(0.25)
+        league_data = get_league_data_by_summoner_id(summoner_id)
+        for stats in league_data:
+            if stats['queueType'] == "RANKED_SOLO_5x5":
+                tier = stats['tier']
+                rank = stats['rank']
+                points = stats['leaguePoints']
+                team_lps.append(RANK_MAPPING[tier] + TIER_MAPPING[rank] + points)
+
+    return int(np.mean(team_lps))
+
+
+def get_rank_string_from_lp(lp):
+    sorted_ranks = sorted(RANK_MAPPING.items(), key=lambda x: x[1])
+    for k, v in sorted_ranks:
+        if lp > v and lp < v + 400:
+            remaining_lp = lp - v
+            tier = k
+            sorted_tiers = sorted(TIER_MAPPING.items(), key=lambda x: x[1])
+            for k, v in sorted_tiers:
+                if remaining_lp > v and remaining_lp < v + 100:
+                    return f"{tier} {k} {remaining_lp - v}LP"
+
 RANK_MAPPING = {
     "IRON": 0,
     "BRONZE": 400,
@@ -228,6 +261,8 @@ for team in teams:
         kps = []
         max_cs_adv_on_lane_opponents = []
         gold_per_minutes = []
+        counter = 0
+        avg_ranks = []
         for dto in matches:
             duration_seconds = get_duration_seconds(dto)
             if duration_seconds > 210:
@@ -252,6 +287,10 @@ for team in teams:
                 kps.append(kp)
                 max_cs_adv_on_lane_opponents.append(max_cs_adv_on_lane_opponent)
                 gold_per_minutes.append(gold_per_minute)
+                if counter < 5:
+                    avg_rank = get_avg_rank(dto)
+                    avg_ranks.append(avg_rank)
+                counter += 1
             else:
                 remake +=1
         wins.append(win)
@@ -262,6 +301,7 @@ for team in teams:
         avg_max_cs_adv_on_lane_opponent = np.mean(max_cs_adv_on_lane_opponents)
         avg_gold_per_minute = np.mean(gold_per_minutes)
         wr = win / (win + loss) if win + loss > 0 else 0
+        last5_games_avg_rank = get_rank_string_from_lp(int(np.mean(avg_ranks)))
         if len(durations) == 0:
             avg_duration = 0
         else:
@@ -285,6 +325,7 @@ for team in teams:
                 "assists": assists,
                 "avg_max_cs_adv_on_lane_opponent": avg_max_cs_adv_on_lane_opponent,
                 "avg_gold_per_minute": avg_gold_per_minute,
+                "last5_games_avg_rank": last5_games_avg_rank,
             }
         )
     if matches:
