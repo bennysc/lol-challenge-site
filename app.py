@@ -98,8 +98,8 @@ def get_avg_rank(match_dto):
     for participant in match_dto["info"]["participants"]:
         summoner_id = match_dto["info"]["participants"][0]['summonerId']
         import time
-        # wait .25 seconds
-        time.sleep(0.25)
+        # wait .02 seconds
+        time.sleep(0.02)
         league_data = get_league_data_by_summoner_id(summoner_id)
         for stats in league_data:
             if stats['queueType'] == "RANKED_SOLO_5x5":
