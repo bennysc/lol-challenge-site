@@ -150,8 +150,8 @@ def get_kda_player_stats(match_dto, puuid):
             kills = participant["kills"]
             deaths = participant["deaths"]
             assists = participant["assists"]
-            max_cs_adv_on_lane_opponent = participant["maxCsAdvantageOnLaneOpponent"]
-            gold_per_minute = participant["goldPerMinute"]
+            max_cs_adv_on_lane_opponent = participant["challenges"]["maxCsAdvantageOnLaneOpponent"]
+            gold_per_minute = participant["challenges"]["goldPerMinute"]
             return (kills, deaths, assists, max_cs_adv_on_lane_opponent, gold_per_minute)
     return None
 
