@@ -199,8 +199,10 @@ for team in teams:
         win = 0
         loss = 0
         remake = 0
+        durations = []
         for dto in matches:
-            if get_duration_seconds(dto) > 210:
+            duration_seconds = get_duration_seconds(dto)
+            if duration_seconds > 210:
                 team = get_team(dto, account["puuid"])
                 winning_team = get_winning_team(dto)
                 if team == winning_team:
@@ -209,6 +211,7 @@ for team in teams:
                     loss += 1
             else:
                 remake +=1
+            durations.append(duration_seconds)
         wins.append(win)
         losses.append(loss)
         remakes.append(remake)
@@ -223,6 +226,7 @@ for team in teams:
                 "rank": get_rank_string(account),
                 "lp": get_lp(account),
                 "remakes": remake,
+                "avg_duration": np.mean(durations),
             }
         )
     if matches:
@@ -244,7 +248,7 @@ for team in teams:
     data.extend(teamdata)
     mean_wins = np.mean(wins)
     mean_losses = np.mean(losses)
-    
+
     if mean_wins + mean_losses == 0:
         winrate = 0
     else:
