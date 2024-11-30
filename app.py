@@ -48,7 +48,7 @@ teams = [
         "id": 4,
         "name": "yellow",
         "members": [
-            {"realname": "EJ", "name": "Monoler", "tag": "NA1"},
+            {"realname": "EJ", "name": "BennysDisciple", "tag": "NA13"},
             {"realname": "Edwin", "name": "Mitooma", "tag": "NA1"},
         ],
     },
