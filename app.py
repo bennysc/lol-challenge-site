@@ -203,6 +203,7 @@ for team in teams:
         for dto in matches:
             duration_seconds = get_duration_seconds(dto)
             if duration_seconds > 210:
+                durations.append(duration_seconds)
                 team = get_team(dto, account["puuid"])
                 winning_team = get_winning_team(dto)
                 if team == winning_team:
@@ -211,7 +212,6 @@ for team in teams:
                     loss += 1
             else:
                 remake +=1
-            durations.append(duration_seconds)
         wins.append(win)
         losses.append(loss)
         remakes.append(remake)
