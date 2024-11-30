@@ -216,6 +216,8 @@ for team in teams:
         losses.append(loss)
         remakes.append(remake)
         wr = win / (win + loss) if win + loss > 0 else 0
+        avg_duration = np.mean(durations)
+        avg_duration_str = str(datetime.timedelta(seconds=avg_duration))
         teamdata.append(
             {
                 "name": realname,
@@ -226,7 +228,7 @@ for team in teams:
                 "rank": get_rank_string(account),
                 "lp": get_lp(account),
                 "remakes": remake,
-                "avg_duration": np.mean(durations),
+                "avg_duration": avg_duration_str,
             }
         )
     if matches:
