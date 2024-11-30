@@ -238,8 +238,8 @@ def get_duration_seconds(dto):
 data = []
 for team in teams:
     import time
-    # wait 2 seconds
-    time.sleep(2)
+    # wait 0.02 seconds
+    time.sleep(0.02)
     # st.markdown(
     #     f"""{team["name"]} {get_link(team["members"][0])},
     #     {get_link(team["members"][1])}
