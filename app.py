@@ -16,7 +16,7 @@ riot_watcher = RiotWatcher(os.environ["RIOT_API_KEY"])
 
 my_region = "na1"
 
-
+st.set_page_config(layout="wide")
 st.title("LoL Challenge")
 
 teams = [
@@ -326,6 +326,7 @@ st.dataframe(
 def clear_cache():
     st.cache_data.clear()
     st.write("Cache cleared")
+
 
 
 st.button("Clear cache", on_click=clear_cache)
