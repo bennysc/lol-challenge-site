@@ -216,7 +216,10 @@ for team in teams:
         losses.append(loss)
         remakes.append(remake)
         wr = win / (win + loss) if win + loss > 0 else 0
-        avg_duration = np.mean(durations)
+        if len(durations) == 0:
+            avg_duration = 0
+        else:
+            avg_duration = np.mean(durations)
         avg_duration_str = str(datetime.timedelta(seconds=int(avg_duration)))
         teamdata.append(
             {
