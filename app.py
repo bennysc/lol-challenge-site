@@ -115,6 +115,8 @@ def get_ranked_stats(acc):
 @st.cache_data
 def get_rank_string(acc):
     ranked_stats = get_ranked_stats(acc)
+    if not ranked_stats:
+        return "UNRANKED"
     tier = ranked_stats['tier']
     rank = ranked_stats['rank']
     points = ranked_stats['leaguePoints']
