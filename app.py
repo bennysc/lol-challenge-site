@@ -214,7 +214,7 @@ for team in teams:
     # st.text(f"Losses: {mean_losses}")
     # st.text(f"Winrate: {winrate}")
 
-df = pd.DataFrame(data).sort_values("winrate", ascending=False)
+df = pd.DataFrame(data).sort_values("LP", ascending=False)
 
 st.dataframe(
     df,
