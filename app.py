@@ -199,6 +199,9 @@ def get_duration_seconds(dto):
 
 data = []
 for team in teams:
+    import time
+    # wait 2 seconds
+    time.sleep(2)
     # st.markdown(
     #     f"""{team["name"]} {get_link(team["members"][0])},
     #     {get_link(team["members"][1])}
@@ -236,15 +239,15 @@ for team in teams:
                     win += 1
                 else:
                     loss += 1
-                kills, deaths, assists, max_cs_adv_on_lane_opponent, gold_per_minute = get_kda_player_stats(dto, account["puuid"])
-                kills += kills
-                deaths += deaths
-                assists += assists
+                kill, death, assist, max_cs_adv_on_lane_opponent, gold_per_minute = get_kda_player_stats(dto, account["puuid"])
+                kills += kill
+                deaths += death
+                assists += assist
                 if deaths > 0:
-                    kda = (kills + assists) / deaths
+                    kda = (kill + assist) / death
                 else:
-                    kda = kills + assists
-                kp = (kills + assists) / max(team_kills, 1)
+                    kda = kill + assist
+                kp = (kill + assist) / max(team_kills, 1)
                 kdas.append(kda)
                 kps.append(kp)
                 max_cs_adv_on_lane_opponents.append(max_cs_adv_on_lane_opponent)
