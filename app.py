@@ -91,7 +91,10 @@ def get_league_data(summoner):
 
 @st.cache_data
 def get_league_data_by_summoner_id(summoner_id):
-    return lol_watcher.league.by_summoner(my_region, summoner_id)
+    league_data = lol_watcher.league.by_summoner(my_region, summoner_id)
+    if not league_data:
+        return []
+    return league_data
 
 @st.cache_data
 def get_avg_rank(match_dto):
@@ -108,8 +111,9 @@ def get_avg_rank(match_dto):
                 rank = stats['rank']
                 points = stats['leaguePoints']
                 team_lps.append(RANK_MAPPING[tier] + TIER_MAPPING[rank] + points)
-
-    return int(np.mean(team_lps))
+    if not team_lps:
+        return 0
+    return np.mean(team_lps)
 
 
 def get_rank_string_from_lp(lp):
