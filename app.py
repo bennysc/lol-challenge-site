@@ -100,7 +100,7 @@ def get_league_data_by_summoner_id(summoner_id):
 def get_avg_rank(match_dto):
     team_lps = []
     for participant in match_dto["info"]["participants"]:
-        summoner_id = match_dto["info"]["participants"][0]['summonerId']
+        summoner_id = participant['summonerId']
         import time
         # wait .02 seconds
         time.sleep(0.02)
@@ -112,8 +112,8 @@ def get_avg_rank(match_dto):
                 points = stats['leaguePoints']
                 team_lps.append(RANK_MAPPING[tier] + TIER_MAPPING[rank] + points)
     if not team_lps:
-        return 0
-    return np.mean(team_lps)
+        return None
+    return int(np.mean(team_lps))
 
 
 def get_rank_string_from_lp(lp):
@@ -296,7 +296,8 @@ for team in teams:
                 gold_per_minutes.append(gold_per_minute)
                 if counter < 5 and member_counter == 0:
                     avg_rank = get_avg_rank(dto)
-                    avg_ranks.append(avg_rank)
+                    if avg_rank:
+                        avg_ranks.append(avg_rank)
                 counter += 1
             else:
                 remake +=1
@@ -309,7 +310,8 @@ for team in teams:
         avg_max_cs_adv_on_lane_opponent = np.mean(max_cs_adv_on_lane_opponents)
         avg_gold_per_minute = np.mean(gold_per_minutes)
         wr = win / (win + loss) if win + loss > 0 else 0
-        avg_team_rank = np.mean(avg_ranks).astype(int)
+        print(avg_ranks)
+        avg_team_rank = np.mean(avg_ranks)
         if len(durations) == 0:
             avg_duration = 0
         else:
