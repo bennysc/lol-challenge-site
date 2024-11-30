@@ -124,6 +124,8 @@ def get_rank_string(acc):
 
 def get_lp(acc):
     ranked_stats = get_ranked_stats(acc)
+    if not ranked_stats:
+        return 0
     tier = ranked_stats['tier']
     rank = ranked_stats['rank']
     points = ranked_stats['leaguePoints']
