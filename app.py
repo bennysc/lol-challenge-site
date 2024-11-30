@@ -249,6 +249,8 @@ for team in teams:
     losses = []
     remakes = []
     teamdata = []
+    member_counter = 0
+    avg_team_rank = 0
     for member in team["members"]:
         fullname = get_fullname(member["name"], member["tag"])
         realname = member["realname"]
@@ -292,12 +294,13 @@ for team in teams:
                 kps.append(kp)
                 max_cs_adv_on_lane_opponents.append(max_cs_adv_on_lane_opponent)
                 gold_per_minutes.append(gold_per_minute)
-                if counter < 5:
+                if counter < 5 and member_counter == 0:
                     avg_rank = get_avg_rank(dto)
                     avg_ranks.append(avg_rank)
                 counter += 1
             else:
                 remake +=1
+        member_counter += 1
         wins.append(win)
         losses.append(loss)
         remakes.append(remake)
@@ -306,7 +309,7 @@ for team in teams:
         avg_max_cs_adv_on_lane_opponent = np.mean(max_cs_adv_on_lane_opponents)
         avg_gold_per_minute = np.mean(gold_per_minutes)
         wr = win / (win + loss) if win + loss > 0 else 0
-        last5_games_avg_rank = get_rank_string_from_lp(int(np.mean(avg_ranks)))
+        avg_team_rank = np.mean(avg_ranks).astype(int)
         if len(durations) == 0:
             avg_duration = 0
         else:
@@ -330,7 +333,6 @@ for team in teams:
                 "assists": assists,
                 "avg_max_cs_adv_on_lane_opponent": avg_max_cs_adv_on_lane_opponent,
                 "avg_gold_per_minute": avg_gold_per_minute,
-                "last5_games_avg_rank": last5_games_avg_rank,
             }
         )
     if matches:
@@ -349,6 +351,7 @@ for team in teams:
         d["avg_lp"] = avg_lp
         d["team"] = team_description
         d["last_match"] = est_time
+        d["avg_team_rank"] = avg_team_rank
     data.extend(teamdata)
     mean_wins = np.mean(wins)
     mean_losses = np.mean(losses)
