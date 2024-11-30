@@ -172,6 +172,13 @@ def get_link(team_member):
     return s
 
 
+def get_duration_seconds(dto):
+    ts = dto['info']['gameEndTimestamp']
+    ts2 = dto['info']['gameStartTimestamp']
+    duration_seconds = ((ts-ts2)/1000)
+    return duration_seconds
+
+
 data = []
 for team in teams:
     # st.markdown(
@@ -181,6 +188,7 @@ for team in teams:
     # )
     wins = []
     losses = []
+    remakes = []
     teamdata = []
     for member in team["members"]:
         fullname = get_fullname(member["name"], member["tag"])
@@ -190,15 +198,20 @@ for team in teams:
         matches = get_matches(account["puuid"])
         win = 0
         loss = 0
+        remake = 0
         for dto in matches:
-            team = get_team(dto, account["puuid"])
-            winning_team = get_winning_team(dto)
-            if team == winning_team:
-                win += 1
+            if get_duration_seconds(dto) > 210:
+                team = get_team(dto, account["puuid"])
+                winning_team = get_winning_team(dto)
+                if team == winning_team:
+                    win += 1
+                else:
+                    loss += 1
             else:
-                loss += 1
+                remake +=1
         wins.append(win)
         losses.append(loss)
+        remakes.append(remake)
         wr = win / (win + loss) if win + loss > 0 else 0
         teamdata.append(
             {
@@ -209,6 +222,7 @@ for team in teams:
                 "winrate": wr,
                 "rank": get_rank_string(account),
                 "lp": get_lp(account),
+                "remakes": remake,
             }
         )
     if matches:
@@ -230,6 +244,7 @@ for team in teams:
     data.extend(teamdata)
     mean_wins = np.mean(wins)
     mean_losses = np.mean(losses)
+    
     if mean_wins + mean_losses == 0:
         winrate = 0
     else:
