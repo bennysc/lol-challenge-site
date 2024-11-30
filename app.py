@@ -76,6 +76,57 @@ def get_matches(puuid):
         matches.append(lol_watcher.match.by_id(my_region, match_id))
     return matches
 
+@st.cache_data
+def get_summoner(acc):
+    return lol_watcher.summoner.by_puuid(my_region, acc['puuid'])
+
+@st.cache_data
+def get_league_data(summoner):
+    return lol_watcher.league.by_summoner(my_region, summoner['id'])
+
+
+RANK_MAPPING = {
+    "IRON": 0,
+    "BRONZE": 400,
+    "SILVER": 800,
+    "GOLD": 1200,
+    "PLATINUM": 1600,
+    "EMERALD": 2000,
+    "DIAMOND": 2400,
+}
+
+TIER_MAPPING = {
+    "IV": 0,
+    "III": 100,
+    "II": 200,
+    "I": 300,
+}
+
+
+def get_ranked_stats(acc):
+    summoner = get_summoner(acc)
+    leaguedata = get_league_data(summoner)
+    for stats in leaguedata:
+        if stats['queueType'] == "RANKED_SOLO_5x5":
+            return stats
+    return None
+
+
+@st.cache_data
+def get_rank_string(acc):
+    ranked_stats = get_ranked_stats(acc)
+    tier = ranked_stats['tier']
+    rank = ranked_stats['rank']
+    points = ranked_stats['leaguePoints']
+    return f"{tier} {rank} {points}LP"
+
+def get_lp(acc):
+    ranked_stats = get_ranked_stats(acc)
+    tier = ranked_stats['tier']
+    rank = ranked_stats['rank']
+    points = ranked_stats['leaguePoints']
+    return RANK_MAPPING[tier] + TIER_MAPPING[rank] + points
+
 
 def get_team(match_dto, puuid):
     for participant in match_dto["info"]["participants"]:
@@ -145,6 +196,8 @@ for team in teams:
                 "wins": win,
                 "losses": loss,
                 "winrate": wr,
+                "rank": get_rank_string(account),
+                "LP":get_lp(account)  
             }
         )
     mean_wins = np.mean(wins)
