@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import os
+import datetime
+from zoneinfo import ZoneInfo
 
 
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
@@ -22,40 +24,40 @@ teams = [
         "id": 1,
         "name": "blue",
         "members": [
-            {"realname":"Benny","name": "gorp", "tag": "grubs"},
-            {"realname":"Surge","name": "Big Beak", "tag": "beak"},
+            {"realname": "Benny", "name": "gorp", "tag": "grubs"},
+            {"realname": "Surge", "name": "Big Beak", "tag": "beak"},
         ],
     },
     {
         "id": 2,
         "name": "red",
         "members": [
-            {"realname":"Draco","name": "Rank1Azir", "tag": "8182"},
-            {"realname":"BP","name": "AnaSecretAdmirer", "tag": "885"},
+            {"realname": "Draco", "name": "Rank1Azir", "tag": "8182"},
+            {"realname": "BP", "name": "AnaSecretAdmirer", "tag": "885"},
         ],
     },
     {
         "id": 3,
         "name": "green",
         "members": [
-            {"realname":"Calvin","name": "BennyGoatBAAAH", "tag": "NA3"},
-            {"realname":"Sam","name": "CantHandicapMe", "tag": "CALVN"},
+            {"realname": "Calvin", "name": "BennyGoatBAAAH", "tag": "NA3"},
+            {"realname": "Sam", "name": "CantHandicapMe", "tag": "CALVN"},
         ],
     },
     {
         "id": 4,
         "name": "yellow",
         "members": [
-            {"realname":"EJ","name": "Monoler", "tag": "NA1"},
-            {"realname":"Edwin","name": "Mitooma", "tag": "NA1"},
+            {"realname": "EJ", "name": "Monoler", "tag": "NA1"},
+            {"realname": "Edwin", "name": "Mitooma", "tag": "NA1"},
         ],
     },
     {
         "id": 5,
         "name": "purple",
         "members": [
-            {"realname":"Raythar","name": "BennysBonita", "tag": "Benny"},
-            {"realname":"Snivel","name": "Odegurd", "tag": "NA1"},
+            {"realname": "Raythar", "name": "BennysBonita", "tag": "Benny"},
+            {"realname": "Snivel", "name": "Odegurd", "tag": "NA1"},
         ],
     },
 ]
@@ -76,13 +78,15 @@ def get_matches(puuid):
         matches.append(lol_watcher.match.by_id(my_region, match_id))
     return matches
 
+
 @st.cache_data
 def get_summoner(acc):
-    return lol_watcher.summoner.by_puuid(my_region, acc['puuid'])
+    return lol_watcher.summoner.by_puuid(my_region, acc["puuid"])
+
 
 @st.cache_data
 def get_league_data(summoner):
-    return lol_watcher.league.by_summoner(my_region, summoner['id'])
+    return lol_watcher.league.by_summoner(my_region, summoner["id"])
 
 
 RANK_MAPPING = {
@@ -107,7 +111,7 @@ def get_ranked_stats(acc):
     summoner = get_summoner(acc)
     leaguedata = get_league_data(summoner)
     for stats in leaguedata:
-        if stats['queueType'] == "RANKED_SOLO_5x5":
+        if stats["queueType"] == "RANKED_SOLO_5x5":
             return stats
     return None
 
@@ -117,18 +121,19 @@ def get_rank_string(acc):
     ranked_stats = get_ranked_stats(acc)
     if not ranked_stats:
         return "UNRANKED"
-    tier = ranked_stats['tier']
-    rank = ranked_stats['rank']
-    points = ranked_stats['leaguePoints']
+    tier = ranked_stats["tier"]
+    rank = ranked_stats["rank"]
+    points = ranked_stats["leaguePoints"]
     return f"{tier} {rank} {points}LP"
+
 
 def get_lp(acc):
     ranked_stats = get_ranked_stats(acc)
     if not ranked_stats:
         return 0
-    tier = ranked_stats['tier']
-    rank = ranked_stats['rank']
-    points = ranked_stats['leaguePoints']
+    tier = ranked_stats["tier"]
+    rank = ranked_stats["rank"]
+    points = ranked_stats["leaguePoints"]
     return RANK_MAPPING[tier] + TIER_MAPPING[rank] + points
 
 
@@ -170,7 +175,7 @@ def get_link(team_member):
 data = []
 for team in teams:
     # st.markdown(
-    #     f"""{team["name"]} {get_link(team["members"][0])}, 
+    #     f"""{team["name"]} {get_link(team["members"][0])},
     #     {get_link(team["members"][1])}
     #     """
     # )
@@ -203,14 +208,25 @@ for team in teams:
                 "losses": loss,
                 "winrate": wr,
                 "rank": get_rank_string(account),
-                "lp":get_lp(account)  
+                "lp": get_lp(account),
             }
         )
+    if matches:
+        last_match = matches[0]
+        ts = last_match["info"]["gameEndTimestamp"]
+        est_time = (
+            datetime.datetime.fromtimestamp(ts / 1000.0, tz=datetime.timezone.utc)
+            .astimezone(tz=ZoneInfo("US/Eastern"))
+            .strftime("%Y-%m-%d %H:%M:%S")
+        )
+    else:
+        est_time = "No matches"
     avg_lp = sum([d["lp"] for d in teamdata]) / len(teamdata)
     team_description = f"{teamdata[0]['name']} and {teamdata[1]['name']}"
     for d in teamdata:
         d["avg_lp"] = avg_lp
         d["team"] = team_description
+        d["last_match"] = est_time
     data.extend(teamdata)
     mean_wins = np.mean(wins)
     mean_losses = np.mean(losses)
