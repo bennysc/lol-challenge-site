@@ -1,14 +1,15 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+import os
 
 
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
 
 
-lol_watcher = LolWatcher("RGAPI-87b56346-da5f-42d7-843e-05db820b8ef7")
+lol_watcher = LolWatcher(os.environ["RIOT_API_KEY"])
 
-riot_watcher = RiotWatcher("RGAPI-87b56346-da5f-42d7-843e-05db820b8ef7")
+riot_watcher = RiotWatcher(os.environ["RIOT_API_KEY"])
 
 
 my_region = "na1"
