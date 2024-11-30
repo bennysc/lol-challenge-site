@@ -1,0 +1,175 @@
+import streamlit as st
+import numpy as np
+import pandas as pd
+
+
+from riotwatcher import LolWatcher, RiotWatcher, ApiError
+
+
+lol_watcher = LolWatcher("RGAPI-87b56346-da5f-42d7-843e-05db820b8ef7")
+
+riot_watcher = RiotWatcher("RGAPI-87b56346-da5f-42d7-843e-05db820b8ef7")
+
+
+my_region = "na1"
+
+
+st.title("LoL Challenge")
+
+teams = [
+    {
+        "id": 1,
+        "name": "blue",
+        "members": [
+            {"name": "gorp", "tag": "grubs"},
+            {"name": "Big Beak", "tag": "beak"},
+        ],
+    },
+    {
+        "id": 2,
+        "name": "red",
+        "members": [
+            {"name": "Rank1Azir", "tag": "8182"},
+            {"name": "AnaSecretAdmirer", "tag": "885"},
+        ],
+    },
+    {
+        "id": 3,
+        "name": "green",
+        "members": [
+            {"name": "BennyGoatBAAAH", "tag": "NA3"},
+            {"name": "CantHandicapMe", "tag": "CALVN"},
+        ],
+    },
+    {
+        "id": 4,
+        "name": "yellow",
+        "members": [
+            {"name": "Monoler", "tag": "NA1"},
+            {"name": "Mitooma", "tag": "NA1"},
+        ],
+    },
+    {
+        "id": 5,
+        "name": "purple",
+        "members": [
+            {"name": "BennysBonita", "tag": "Benny"},
+            {"name": "Odegurd", "tag": "NA1"},
+        ],
+    },
+]
+
+
+@st.cache_data
+def get_account(name, tag):
+    return riot_watcher.account.by_riot_id("AMERICAS", name, tag)
+
+
+@st.cache_data
+def get_matches(puuid):
+    match_ids = lol_watcher.match.matchlist_by_puuid(
+        my_region, puuid, count=100, queue=420
+    )
+    matches = []
+    for match_id in match_ids:
+        matches.append(lol_watcher.match.by_id(my_region, match_id))
+    return matches
+
+
+def get_team(match_dto, puuid):
+    for participant in match_dto["info"]["participants"]:
+        if participant["puuid"] == puuid:
+            return participant["teamId"]
+    return None
+
+
+def get_winning_team(match_dto):
+    for team in match_dto["info"]["teams"]:
+        if team["win"]:
+            return team["teamId"]
+    return None
+
+
+def get_fullname(name, tag):
+    return f"{name}#{tag}"
+
+
+def get_opgg(name, tag):
+    import urllib.parse
+
+    s = f"https://op.gg/summoners/na/{name}-{tag}"
+    # urlencode string
+    return urllib.parse.quote(s, safe=":/")
+
+
+def get_link(team_member):
+    name = team_member["name"]
+    tag = team_member["tag"]
+    fullname = get_fullname(name, tag)
+    opgg = get_opgg(name, tag)
+    s = f"[{fullname}]({opgg})"
+    return s
+
+
+data = []
+for team in teams:
+    # st.markdown(
+    #     f"""{team["name"]} {get_link(team["members"][0])}, 
+    #     {get_link(team["members"][1])}
+    #     """
+    # )
+    wins = []
+    losses = []
+    for member in team["members"]:
+        fullname = get_fullname(member["name"], member["tag"])
+        op_gg = get_opgg(member["name"], member["tag"])
+        account = get_account(member["name"], member["tag"])
+        matches = get_matches(account["puuid"])
+        win = 0
+        loss = 0
+        for dto in matches:
+            team = get_team(dto, account["puuid"])
+            winning_team = get_winning_team(dto)
+            if team == winning_team:
+                win += 1
+            else:
+                loss += 1
+        wins.append(win)
+        losses.append(loss)
+        wr = win / (win + loss) if win + loss > 0 else 0
+        data.append(
+            {
+                "name": fullname,
+                "op.gg": op_gg,
+                "wins": win,
+                "losses": loss,
+                "winrate": wr,
+            }
+        )
+    mean_wins = np.mean(wins)
+    mean_losses = np.mean(losses)
+    if mean_wins + mean_losses == 0:
+        winrate = 0
+    else:
+        winrate = mean_wins / (mean_wins + mean_losses)
+    # st.text(f"Wins: {mean_wins}")
+    # st.text(f"Losses: {mean_losses}")
+    # st.text(f"Winrate: {winrate}")
+
+df = pd.DataFrame(data).sort_values("winrate", ascending=False)
+
+st.dataframe(
+    df,
+    column_config={
+        "account_data": {"max_width": 200},
+        "op.gg": st.column_config.LinkColumn(),
+    },
+)
+
+
+def clear_cache():
+    st.cache_data.clear()
+    st.write("Cache cleared")
+
+
+st.button("Clear cache", on_click=clear_cache)
