@@ -206,7 +206,7 @@ for team in teams:
                 "lp":get_lp(account)  
             }
         )
-    avg_lp = sum([d["LP"] for d in teamdata]) / len(teamdata)
+    avg_lp = sum([d["lp"] for d in teamdata]) / len(teamdata)
     team_description = f"{teamdata[0]['name']} and {teamdata[1]['name']}"
     for d in teamdata:
         d["avg_lp"] = avg_lp
