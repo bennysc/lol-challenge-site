@@ -93,6 +93,7 @@ def get_league_data(summoner):
 def get_league_data_by_summoner_id(summoner_id):
     return lol_watcher.league.by_summoner(my_region, summoner_id)
 
+@st.cache_data
 def get_avg_rank(match_dto):
     team_lps = []
     for participant in match_dto["info"]["participants"]:
