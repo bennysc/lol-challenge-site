@@ -144,6 +144,24 @@ def get_team(match_dto, puuid):
     return None
 
 
+def get_kda_player_stats(match_dto, puuid):
+    for participant in match_dto["info"]["participants"]:
+        if participant["puuid"] == puuid:
+            kills = participant["kills"]
+            deaths = participant["deaths"]
+            assists = participant["assists"]
+            max_cs_adv_on_lane_opponent = participant["maxCsAdvantageOnLaneOpponent"]
+            gold_per_minute = participant["goldPerMinute"]
+            return (kills, deaths, assists, max_cs_adv_on_lane_opponent, gold_per_minute)
+    return None
+
+def get_team_kills(match_dto, team_id):
+    for team in match_dto["info"]["teams"]:
+        if team["teamId"] == team_id:
+            return team["objectives"]["champion"]["kills"]
+    return None
+
+
 def get_winning_team(match_dto):
     for team in match_dto["info"]["teams"]:
         if team["win"]:
@@ -200,21 +218,46 @@ for team in teams:
         loss = 0
         remake = 0
         durations = []
+        kills = 0
+        deaths = 0
+        assists = 0
+        kdas = []
+        kps = []
+        max_cs_adv_on_lane_opponents = []
+        gold_per_minutes = []
         for dto in matches:
             duration_seconds = get_duration_seconds(dto)
             if duration_seconds > 210:
                 durations.append(duration_seconds)
                 team = get_team(dto, account["puuid"])
+                team_kills = get_team_kills(dto, team)
                 winning_team = get_winning_team(dto)
                 if team == winning_team:
                     win += 1
                 else:
                     loss += 1
+                kills, deaths, assists, max_cs_adv_on_lane_opponent, gold_per_minute = get_kda_player_stats(dto, account["puuid"])
+                kills += kills
+                deaths += deaths
+                assists += assists
+                if deaths > 0:
+                    kda = (kills + assists) / deaths
+                else:
+                    kda = kills + assists
+                kp = (kills + assists) / max(team_kills, 1)
+                kdas.append(kda)
+                kps.append(kp)
+                max_cs_adv_on_lane_opponents.append(max_cs_adv_on_lane_opponent)
+                gold_per_minutes.append(gold_per_minute)
             else:
                 remake +=1
         wins.append(win)
         losses.append(loss)
         remakes.append(remake)
+        avg_kda = np.mean(kdas)
+        avg_kp = np.mean(kps)
+        avg_max_cs_adv_on_lane_opponent = np.mean(max_cs_adv_on_lane_opponents)
+        avg_gold_per_minute = np.mean(gold_per_minutes)
         wr = win / (win + loss) if win + loss > 0 else 0
         if len(durations) == 0:
             avg_duration = 0
@@ -232,6 +275,13 @@ for team in teams:
                 "lp": get_lp(account),
                 "remakes": remake,
                 "avg_duration": avg_duration_str,
+                "avg_kda": avg_kda,
+                "avg_kp": avg_kp,
+                "kills": kills,
+                "deaths": deaths,
+                "assists": assists,
+                "avg_max_cs_adv_on_lane_opponent": avg_max_cs_adv_on_lane_opponent,
+                "avg_gold_per_minute": avg_gold_per_minute,
             }
         )
     if matches:
