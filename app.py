@@ -295,7 +295,7 @@ def get_data(timestamp):
                     kills += kill
                     deaths += death
                     assists += assist
-                    if deaths > 0:
+                    if death > 0:
                         kda = (kill + assist) / death
                     else:
                         kda = kill + assist
