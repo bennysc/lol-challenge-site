@@ -239,153 +239,157 @@ def get_duration_seconds(dto):
     return duration_seconds
 
 
-data = []
-for team in teams:
-    # st.markdown(
-    #     f"""{team["name"]} {get_link(team["members"][0])},
-    #     {get_link(team["members"][1])}
-    #     """
-    # )
-    wins = []
-    losses = []
-    remakes = []
-    teamdata = []
-    avg_team_rank = 0
-    avg_team_rank_str = ""
-    member_counter = 0
-    avg_ranks = []
-    for member in team["members"]:
-        fullname = get_fullname(member["name"], member["tag"])
-        realname = member["realname"]
-        op_gg = get_opgg(member["name"], member["tag"])
-        account = get_account(member["name"], member["tag"])
-        now_time_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        matches = get_matches(account["puuid"], now_time_str)
-        win = 0
-        loss = 0
-        remake = 0
-        durations = []
-        kills = 0
-        deaths = 0
-        assists = 0
-        kdas = []
-        kps = []
-        max_cs_adv_on_lane_opponents = []
-        gold_per_minutes = []
-        counter = 0
-        for dto in matches:
-            duration_seconds = get_duration_seconds(dto)
-            if duration_seconds > 210:
-                durations.append(duration_seconds)
-                team = get_team(dto, account["puuid"])
-                team_kills = get_team_kills(dto, team)
-                winning_team = get_winning_team(dto)
-                if team == winning_team:
-                    win += 1
+def round_to_nearest_10_seconds(dt):
+    return dt + datetime.timedelta(seconds=-(dt.second % 10))
+    
+
+def get_data():
+    data = []
+    for team in teams:
+        # st.markdown(
+        #     f"""{team["name"]} {get_link(team["members"][0])},
+        #     {get_link(team["members"][1])}
+        #     """
+        # )
+        wins = []
+        losses = []
+        remakes = []
+        teamdata = []
+        avg_team_rank = 0
+        avg_team_rank_str = ""
+        member_counter = 0
+        avg_ranks = []
+        for member in team["members"]:
+            fullname = get_fullname(member["name"], member["tag"])
+            realname = member["realname"]
+            op_gg = get_opgg(member["name"], member["tag"])
+            account = get_account(member["name"], member["tag"])
+            dt = datetime.datetime.now()
+            dtr = round_to_nearest_10_seconds(dt)
+            now_time_str = dtr.strftime("%Y-%m-%dT%H:%M:%S")
+            matches = get_matches(account["puuid"], now_time_str)
+            win = 0
+            loss = 0
+            remake = 0
+            durations = []
+            kills = 0
+            deaths = 0
+            assists = 0
+            kdas = []
+            kps = []
+            max_cs_adv_on_lane_opponents = []
+            gold_per_minutes = []
+            counter = 0
+            for dto in matches:
+                duration_seconds = get_duration_seconds(dto)
+                if duration_seconds > 210:
+                    durations.append(duration_seconds)
+                    team = get_team(dto, account["puuid"])
+                    team_kills = get_team_kills(dto, team)
+                    winning_team = get_winning_team(dto)
+                    if team == winning_team:
+                        win += 1
+                    else:
+                        loss += 1
+                    kill, death, assist, max_cs_adv_on_lane_opponent, gold_per_minute = get_kda_player_stats(dto, account["puuid"])
+                    kills += kill
+                    deaths += death
+                    assists += assist
+                    if deaths > 0:
+                        kda = (kill + assist) / death
+                    else:
+                        kda = kill + assist
+                    kp = (kill + assist) / max(team_kills, 1)
+                    kdas.append(kda)
+                    kps.append(kp)
+                    max_cs_adv_on_lane_opponents.append(max_cs_adv_on_lane_opponent)
+                    gold_per_minutes.append(gold_per_minute)
+                    if counter < 5 and member_counter == 0:
+                        avg_rank = get_avg_rank(dto)
+                        if avg_rank:
+                            avg_ranks.append(avg_rank)
+                    counter += 1
                 else:
-                    loss += 1
-                kill, death, assist, max_cs_adv_on_lane_opponent, gold_per_minute = get_kda_player_stats(dto, account["puuid"])
-                kills += kill
-                deaths += death
-                assists += assist
-                if deaths > 0:
-                    kda = (kill + assist) / death
-                else:
-                    kda = kill + assist
-                kp = (kill + assist) / max(team_kills, 1)
-                kdas.append(kda)
-                kps.append(kp)
-                max_cs_adv_on_lane_opponents.append(max_cs_adv_on_lane_opponent)
-                gold_per_minutes.append(gold_per_minute)
-                if counter < 5 and member_counter == 0:
-                    avg_rank = get_avg_rank(dto)
-                    if avg_rank:
-                        avg_ranks.append(avg_rank)
-                counter += 1
+                    remake +=1
+            member_counter += 1
+            wins.append(win)
+            losses.append(loss)
+            remakes.append(remake)
+            avg_kda = np.mean(kdas)
+            avg_kp = np.mean(kps)
+            avg_max_cs_adv_on_lane_opponent = np.mean(max_cs_adv_on_lane_opponents)
+            avg_gold_per_minute = np.mean(gold_per_minutes)
+            wr = win / (win + loss) if win + loss > 0 else 0
+            print(avg_ranks)
+            avg_team_rank = np.mean(avg_ranks)
+            if len(avg_ranks) == 0:
+                avg_team_rank_str = "UNRANKED"
             else:
-                remake +=1
-        member_counter += 1
-        wins.append(win)
-        losses.append(loss)
-        remakes.append(remake)
-        avg_kda = np.mean(kdas)
-        avg_kp = np.mean(kps)
-        avg_max_cs_adv_on_lane_opponent = np.mean(max_cs_adv_on_lane_opponents)
-        avg_gold_per_minute = np.mean(gold_per_minutes)
-        wr = win / (win + loss) if win + loss > 0 else 0
-        print(avg_ranks)
-        avg_team_rank = np.mean(avg_ranks)
-        if len(avg_ranks) == 0:
-            avg_team_rank_str = "UNRANKED"
+                print(avg_team_rank)
+                print(int(avg_team_rank))
+                avg_team_rank_str = get_rank_string_from_lp(int(avg_team_rank))
+            
+            if len(durations) == 0:
+                avg_duration = 0
+            else:
+                avg_duration = np.mean(durations)
+            avg_duration_str = str(datetime.timedelta(seconds=int(avg_duration)))
+            teamdata.append(
+                {
+                    "name": realname,
+                    "opgg": op_gg,
+                    "wins": win,
+                    "losses": loss,
+                    "winrate": wr,
+                    "rank": get_rank_string(account, now_time_str),
+                    "lp": get_lp(account),
+                    "remakes": remake,
+                    "avg_duration": avg_duration_str,
+                    "avg_kda": avg_kda,
+                    "avg_kp": avg_kp,
+                    "kills": kills,
+                    "deaths": deaths,
+                    "assists": assists,
+                    "avg_max_cs_adv_on_lane_opponent": avg_max_cs_adv_on_lane_opponent,
+                    "avg_gold_per_minute": avg_gold_per_minute,
+                }
+            )
+        if matches:
+            last_match = matches[0]
+            ts = last_match["info"]["gameEndTimestamp"]
+            est_time = (
+                datetime.datetime.fromtimestamp(ts / 1000.0, tz=datetime.timezone.utc)
+                .astimezone(tz=ZoneInfo("US/Eastern"))
+                .strftime("%Y-%m-%d %H:%M:%S")
+            )
         else:
-            print(avg_team_rank)
-            print(int(avg_team_rank))
-            avg_team_rank_str = get_rank_string_from_lp(int(avg_team_rank))
-        
-        if len(durations) == 0:
-            avg_duration = 0
+            est_time = "No matches"
+        avg_lp = sum([d["lp"] for d in teamdata]) / len(teamdata)
+        team_description = f"{teamdata[0]['name']} and {teamdata[1]['name']}"
+        print(avg_team_rank_str)
+        for d in teamdata:
+            d["avg_lp"] = avg_lp
+            d["team"] = team_description
+            d["last_match"] = est_time
+            d["avg_game_rank"] = avg_team_rank_str
+        data.extend(teamdata)
+        mean_wins = np.mean(wins)
+        mean_losses = np.mean(losses)
+
+        if mean_wins + mean_losses == 0:
+            winrate = 0
         else:
-            avg_duration = np.mean(durations)
-        avg_duration_str = str(datetime.timedelta(seconds=int(avg_duration)))
-        teamdata.append(
-            {
-                "name": realname,
-                "opgg": op_gg,
-                "wins": win,
-                "losses": loss,
-                "winrate": wr,
-                "rank": get_rank_string(account, now_time_str),
-                "lp": get_lp(account),
-                "remakes": remake,
-                "avg_duration": avg_duration_str,
-                "avg_kda": avg_kda,
-                "avg_kp": avg_kp,
-                "kills": kills,
-                "deaths": deaths,
-                "assists": assists,
-                "avg_max_cs_adv_on_lane_opponent": avg_max_cs_adv_on_lane_opponent,
-                "avg_gold_per_minute": avg_gold_per_minute,
-            }
-        )
-    if matches:
-        last_match = matches[0]
-        ts = last_match["info"]["gameEndTimestamp"]
-        est_time = (
-            datetime.datetime.fromtimestamp(ts / 1000.0, tz=datetime.timezone.utc)
-            .astimezone(tz=ZoneInfo("US/Eastern"))
-            .strftime("%Y-%m-%d %H:%M:%S")
-        )
-    else:
-        est_time = "No matches"
-    avg_lp = sum([d["lp"] for d in teamdata]) / len(teamdata)
-    team_description = f"{teamdata[0]['name']} and {teamdata[1]['name']}"
-    print(avg_team_rank_str)
-    for d in teamdata:
-        d["avg_lp"] = avg_lp
-        d["team"] = team_description
-        d["last_match"] = est_time
-        d["avg_game_rank"] = avg_team_rank_str
-    data.extend(teamdata)
-    mean_wins = np.mean(wins)
-    mean_losses = np.mean(losses)
+            winrate = mean_wins / (mean_wins + mean_losses)
+        # st.text(f"Wins: {mean_wins}")
+        # st.text(f"Losses: {mean_losses}")
+        # st.text(f"Winrate: {winrate}")
 
-    if mean_wins + mean_losses == 0:
-        winrate = 0
-    else:
-        winrate = mean_wins / (mean_wins + mean_losses)
-    # st.text(f"Wins: {mean_wins}")
-    # st.text(f"Losses: {mean_losses}")
-    # st.text(f"Winrate: {winrate}")
+    return pd.DataFrame(data).sort_values("avg_lp", ascending=False)
 
-df = pd.DataFrame(data).sort_values("avg_lp", ascending=False)
-
-st.dataframe(
-    df,
-    column_config={
-        "account_data": {"max_width": 200},
-        "opgg": st.column_config.LinkColumn(),
-    },
-)
+t = st.empty()
+while True:
+    t.dataframe(get_data(), column_config={"opgg": st.column_config.LinkColumn()})
+    time.sleep(90)
 
 
 def clear_cache():
