@@ -395,7 +395,7 @@ t.dataframe(get_data(now_time_str), column_config={"opgg": st.column_config.Link
 while True:
     ts = dtr.strftime("%Y-%m-%dT%H:%M:%S")
     t.dataframe(get_data(ts), column_config={"opgg": st.column_config.LinkColumn()})
-    time.sleep(90)
+    time.sleep(600)
 
 
 def clear_cache():
