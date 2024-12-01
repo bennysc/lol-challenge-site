@@ -263,7 +263,7 @@ for team in teams:
         realname = member["realname"]
         op_gg = get_opgg(member["name"], member["tag"])
         account = get_account(member["name"], member["tag"])
-        now_time_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now_time_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
         matches = get_matches(account["puuid"], now_time_str)
         win = 0
         loss = 0
