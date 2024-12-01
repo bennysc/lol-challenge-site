@@ -242,8 +242,8 @@ def get_duration_seconds(dto):
 def round_to_nearest_10_seconds(dt):
     return dt + datetime.timedelta(seconds=-(dt.second % 10))
     
-
-def get_data():
+@st.cache_data
+def get_data(timestamp):
     data = []
     for team in teams:
         # st.markdown(
@@ -386,9 +386,14 @@ def get_data():
 
     return pd.DataFrame(data).sort_values("avg_lp", ascending=False)
 
+dt = datetime.datetime.now()
+dtr = round_to_nearest_10_seconds(dt)
+now_time_str = dtr.strftime("%Y-%m-%dT%H")
 t = st.empty()
+t.dataframe(get_data(now_time_str), column_config={"opgg": st.column_config.LinkColumn()})
 while True:
-    t.dataframe(get_data(), column_config={"opgg": st.column_config.LinkColumn()})
+    ts = dtr.strftime("%Y-%m-%dT%H:%M:%S")
+    t.dataframe(get_data(ts), column_config={"opgg": st.column_config.LinkColumn()})
     time.sleep(90)
 
 
