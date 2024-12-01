@@ -84,7 +84,6 @@ def get_summoner(acc):
     return lol_watcher.summoner.by_puuid(my_region, acc["puuid"])
 
 
-@st.cache_data
 def get_league_data(summoner):
     return lol_watcher.league.by_summoner(my_region, summoner["id"])
 
@@ -242,9 +241,6 @@ def get_duration_seconds(dto):
 
 data = []
 for team in teams:
-    import time
-    # wait 0.02 seconds
-    time.sleep(0.02)
     # st.markdown(
     #     f"""{team["name"]} {get_link(team["members"][0])},
     #     {get_link(team["members"][1])}
