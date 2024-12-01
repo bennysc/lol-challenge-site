@@ -159,7 +159,7 @@ def get_ranked_stats(acc):
 
 
 @st.cache_data
-def get_rank_string(acc):
+def get_rank_string(acc, timestamp):
     ranked_stats = get_ranked_stats(acc)
     if not ranked_stats:
         return "UNRANKED"
@@ -334,7 +334,7 @@ for team in teams:
                 "wins": win,
                 "losses": loss,
                 "winrate": wr,
-                "rank": get_rank_string(account),
+                "rank": get_rank_string(account, now_time_str),
                 "lp": get_lp(account),
                 "remakes": remake,
                 "avg_duration": avg_duration_str,
