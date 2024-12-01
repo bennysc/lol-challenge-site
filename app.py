@@ -386,6 +386,7 @@ def get_data(timestamp):
 
     return pd.DataFrame(data).sort_values("avg_lp", ascending=False)
 
+import time
 dt = datetime.datetime.now()
 dtr = round_to_nearest_10_seconds(dt)
 now_time_str = dtr.strftime("%Y-%m-%dT%H")
