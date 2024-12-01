@@ -392,10 +392,10 @@ st.dataframe(
 )
 
 
-# def clear_cache():
-#     st.cache_data.clear()
-#     st.write("Cache cleared")
+def clear_cache():
+    st.cache_data.clear()
+    st.write("Cache cleared")
 
 
 
-st.button("Clear cache", on_click=clear_cache)
+# st.button("Clear cache", on_click=clear_cache)
