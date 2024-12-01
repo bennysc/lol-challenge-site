@@ -392,9 +392,9 @@ st.dataframe(
 )
 
 
-def clear_cache():
-    st.cache_data.clear()
-    st.write("Cache cleared")
+# def clear_cache():
+#     st.cache_data.clear()
+#     st.write("Cache cleared")
 
 
 
