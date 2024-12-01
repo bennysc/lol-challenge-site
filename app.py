@@ -69,7 +69,7 @@ def get_account(name, tag):
 
 
 @st.cache_data
-def get_matches(puuid):
+def get_matches(puuid, timestamp):
     match_ids = lol_watcher.match.matchlist_by_puuid(
         my_region, puuid, count=100, queue=420
     )
@@ -263,7 +263,8 @@ for team in teams:
         realname = member["realname"]
         op_gg = get_opgg(member["name"], member["tag"])
         account = get_account(member["name"], member["tag"])
-        matches = get_matches(account["puuid"])
+        now_time_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        matches = get_matches(account["puuid"], now_time_str)
         win = 0
         loss = 0
         remake = 0
