@@ -13,6 +13,19 @@ lol_watcher = LolWatcher(os.environ["RIOT_API_KEY"])
 
 riot_watcher = RiotWatcher(os.environ["RIOT_API_KEY"])
 
+SPACES_KEY = os.environ.get("SPACES_KEY")
+SPACES_SECRET = os.environ.get("SPACES_SECRET")
+
+import os, boto3
+from smart_open import open
+session = boto3.session.Session()
+client = session.client('s3',
+                        region_name='nyc3',
+                        endpoint_url='https://nyc3.digitaloceanspaces.com',
+                        aws_access_key_id=SPACES_KEY,
+                        aws_secret_access_key=SPACES_SECRET)
+transport_params = {'client': client}
+
 
 my_region = "na1"
 
@@ -390,18 +403,20 @@ import time
 dt = datetime.datetime.now()
 dtr = round_to_nearest_10_seconds(dt)
 now_time_str = dtr.strftime("%Y-%m-%dT%H")
+
 t = st.empty()
-t.dataframe(get_data(now_time_str), column_config={"opgg": st.column_config.LinkColumn()})
-while True:
+try:
+    df = pd.read_csv(open('s3://lol-challenge/data.csv', 'r', transport_params=transport_params))
+    t.dataframe(df, column_config={"opgg": st.column_config.LinkColumn()})
+except:
+    pass
+
+
+def refresh_data():
     ts = dtr.strftime("%Y-%m-%dT%H:%M:%S")
-    t.dataframe(get_data(ts), column_config={"opgg": st.column_config.LinkColumn()})
-    time.sleep(600)
+    df1 = get_data(ts)
+    t.dataframe(df1, column_config={"opgg": st.column_config.LinkColumn()})
+    df1.to_csv(open('s3://lol-challenge/testteams.csv', 'wb', transport_params=transport_params), index=False)
 
 
-def clear_cache():
-    st.cache_data.clear()
-    st.write("Cache cleared")
-
-
-
-# st.button("Clear cache", on_click=clear_cache)
+st.button("Refresh Data", on_click=refresh_data)
