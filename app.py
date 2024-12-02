@@ -416,7 +416,7 @@ def refresh_data():
     ts = dtr.strftime("%Y-%m-%dT%H:%M:%S")
     df1 = get_data(ts)
     t.dataframe(df1, column_config={"opgg": st.column_config.LinkColumn()})
-    df1.to_csv(open('s3://lol-challenge/testteams.csv', 'wb', transport_params=transport_params), index=False)
+    df1.to_csv(open('s3://lol-challenge/data.csv', 'wb', transport_params=transport_params), index=False)
 
 
 st.button("Refresh Data", on_click=refresh_data)
