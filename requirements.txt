@@ -1,5 +1,6 @@
-numpy
-pandas
-riotwatcher
-streamlit
-smart_open[s3]
+boto3==1.35.72
+numpy==2.1.3
+pandas==2.2.3
+riotwatcher==3.3.0
+smart_open==7.0.5
+streamlit==1.40.2
