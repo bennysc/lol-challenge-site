@@ -413,8 +413,9 @@ except:
 
 
 def refresh_data():
-    ts = dtr.strftime("%Y-%m-%dT%H:%M:%S")
+    ts = dtr.astimezone(tz=ZoneInfo("US/Eastern")).strftime("%Y-%m-%dT%H:%M:%S")
     df1 = get_data(ts)
+    df1['updated_at'] = ts
     t.dataframe(df1, column_config={"opgg": st.column_config.LinkColumn()})
     df1.to_csv(open('s3://lol-challenge/data.csv', 'wb', transport_params=transport_params), index=False)
 
