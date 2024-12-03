@@ -75,6 +75,17 @@ teams = [
     },
 ]
 
+def get_match_by_id(match_id):
+    import json
+    try:
+        with open(f's3://lol-challenge/matches/{match_id}.json', 'r', transport_params=transport_params) as m:
+            match = json.load(m)
+    except:
+        match = lol_watcher.match.by_id(my_region, match_id)
+        with open(f's3://lol-challenge/matches/{match_id}.json', 'w', transport_params=transport_params) as m:
+            json.dump(match, m)
+    return match
+
 
 @st.cache_data
 def get_account(name, tag):
@@ -88,7 +99,7 @@ def get_matches(puuid, timestamp):
     )
     matches = []
     for match_id in match_ids:
-        matches.append(lol_watcher.match.by_id(my_region, match_id))
+        matches.append(get_match_by_id(match_id))
     return matches
 
 
@@ -103,10 +114,18 @@ def get_league_data(summoner):
 
 @st.cache_data
 def get_league_data_by_summoner_id(summoner_id):
-    league_data = lol_watcher.league.by_summoner(my_region, summoner_id)
-    if not league_data:
-        return []
-    return league_data
+    import json
+    try:
+        with open(f's3://lol-challenge/leagues/{summoner_id}.json', 'r', transport_params=transport_params) as m:
+            league_data = json.load(m)
+        return league_data
+    except:
+        league_data = lol_watcher.league.by_summoner(my_region, summoner_id)
+        if not league_data:
+            return []
+        with open(f's3://lol-challenge/leagues/{summoner_id}.json', 'w', transport_params=transport_params) as m:
+            json.dump(league_data, m)
+        return league_data
 
 @st.cache_data
 def get_avg_rank(match_dto):
