@@ -308,6 +308,7 @@ def get_data(timestamp):
             deaths = 0
             assists = 0
             kdas = []
+            kds = []
             kps = []
             max_cs_adv_on_lane_opponents = []
             gold_per_minutes = []
@@ -329,9 +330,12 @@ def get_data(timestamp):
                     assists += assist
                     if death > 0:
                         kda = (kill + assist) / death
+                        kd = kill / death
                     else:
                         kda = kill + assist
+                        kd = kill
                     kp = (kill + assist) / max(team_kills, 1)
+                    kds.append(kd)
                     kdas.append(kda)
                     kps.append(kp)
                     max_cs_adv_on_lane_opponents.append(max_cs_adv_on_lane_opponent)
@@ -348,6 +352,7 @@ def get_data(timestamp):
             losses.append(loss)
             remakes.append(remake)
             avg_kda = np.mean(kdas)
+            avg_kd = np.mean(kds)
             avg_kp = np.mean(kps)
             avg_max_cs_adv_on_lane_opponent = np.mean(max_cs_adv_on_lane_opponents)
             avg_gold_per_minute = np.mean(gold_per_minutes)
@@ -378,11 +383,11 @@ def get_data(timestamp):
                     "remakes": remake,
                     "avg_duration": avg_duration_str,
                     "avg_kda": avg_kda,
+                    "avg_kd": avg_kd,
                     "avg_kp": avg_kp,
                     "kills": kills,
                     "deaths": deaths,
                     "assists": assists,
-                    "avg_max_cs_adv_on_lane_opponent": avg_max_cs_adv_on_lane_opponent,
                     "avg_gold_per_minute": avg_gold_per_minute,
                 }
             )
@@ -397,10 +402,12 @@ def get_data(timestamp):
         else:
             est_time = "No matches"
         avg_lp = sum([d["lp"] for d in teamdata]) / len(teamdata)
+        avg_rank_string = get_rank_string_from_lp(int(avg_lp))
         team_description = f"{teamdata[0]['name']} and {teamdata[1]['name']}"
         print(avg_team_rank_str)
         for d in teamdata:
             d["avg_lp"] = avg_lp
+            d["avg_rank"] = avg_rank_string
             d["team"] = team_description
             d["last_match"] = est_time
             d["avg_game_rank"] = avg_team_rank_str
@@ -416,7 +423,9 @@ def get_data(timestamp):
         # st.text(f"Losses: {mean_losses}")
         # st.text(f"Winrate: {winrate}")
 
-    return pd.DataFrame(data).sort_values("avg_lp", ascending=False)
+    df2 = pd.DataFrame(data).sort_values("avg_lp", ascending=False)
+    df2 = df2[['team', 'name', 'opgg', 'rank', 'lp', 'avg_lp', 'avg_rank', 'wins', 'losses', 'winrate', 'remakes', 'avg_duration', 'avg_kda', 'avg_kd', 'avg_kp', 'kills', 'deaths', 'assists', 'avg_gold_per_minute', 'last_match', 'avg_game_rank']]
+    return df2
 
 import time
 dt = datetime.datetime.now()
@@ -432,9 +441,11 @@ except:
 
 
 def refresh_data():
-    ts = dtr.astimezone(tz=ZoneInfo("US/Eastern")).strftime("%Y-%m-%dT%H:%M:%S")
+    dt = datetime.datetime.now()
+    ts = dt.astimezone(tz=ZoneInfo("US/Eastern")).strftime("%Y-%m-%dT%H:%M:%S")
     df1 = get_data(ts)
     df1['updated_at'] = ts
+    t = st.empty()
     t.dataframe(df1, column_config={"opgg": st.column_config.LinkColumn()})
     df1.to_csv(open('s3://lol-challenge/data.csv', 'wb', transport_params=transport_params), index=False)
 
