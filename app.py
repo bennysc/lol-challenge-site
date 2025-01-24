@@ -18,13 +18,16 @@ SPACES_SECRET = os.environ.get("SPACES_SECRET")
 
 import os, boto3
 from smart_open import open
+
 session = boto3.session.Session()
-client = session.client('s3',
-                        region_name='nyc3',
-                        endpoint_url='https://nyc3.digitaloceanspaces.com',
-                        aws_access_key_id=SPACES_KEY,
-                        aws_secret_access_key=SPACES_SECRET)
-transport_params = {'client': client}
+client = session.client(
+    "s3",
+    region_name="nyc3",
+    endpoint_url="https://nyc3.digitaloceanspaces.com",
+    aws_access_key_id=SPACES_KEY,
+    aws_secret_access_key=SPACES_SECRET,
+)
+transport_params = {"client": client}
 
 
 my_region = "na1"
@@ -37,52 +40,70 @@ teams = [
         "id": 1,
         "name": "blue",
         "members": [
-            {"realname": "Benny", "name": "gorp", "tag": "grubs"},
-            {"realname": "Surge", "name": "Big Beak", "tag": "beak"},
+            {"realname": "Benny", "name": "festivus", "tag": "feats"},
+            {"realname": "EJ", "name": "TonkaTank420", "tag": "Tank1"},
         ],
     },
     {
         "id": 2,
         "name": "red",
         "members": [
-            {"realname": "Draco", "name": "Rank1Azir", "tag": "8182"},
-            {"realname": "BP", "name": "AnaSecretAdmirer", "tag": "885"},
+            {"realname": "Triston", "name": "Shadow Daddy", "tag": "Bro"},
+            {"realname": "Calvin", "name": "Void Mommy", "tag": "Sis"},
         ],
     },
     {
         "id": 3,
         "name": "green",
         "members": [
-            {"realname": "Calvin", "name": "BennyGoatBAAAH", "tag": "NA3"},
-            {"realname": "Sam", "name": "CantHandicapMe", "tag": "CALVN"},
+            {"realname": "Purgance", "name": "SAM IS BIG BODY", "tag": "TRASH"},
+            {"realname": "Dylan", "name": "SAMiSFaTTY", "tag": "4904"},
         ],
     },
     {
         "id": 4,
         "name": "yellow",
         "members": [
-            {"realname": "EJ", "name": "BennysDisciple", "tag": "NA13"},
-            {"realname": "Edwin", "name": "Mitooma", "tag": "NA1"},
+            {"realname": "Sam", "name": "PikeHigh2014", "tag": "317"},
+            {"realname": "Brandon", "name": "StephenUllrich", "tag": "LOVER"},
         ],
     },
     {
         "id": 5,
         "name": "purple",
         "members": [
-            {"realname": "Raythar", "name": "BennysBonita", "tag": "Benny"},
-            {"realname": "Snivel", "name": "Odegurd", "tag": "NA1"},
+            {"realname": "Downzee", "name": "Wanariceciab", "tag": "7336"},
+            {"realname": "Snivel", "name": "ASPOnTop", "tag": "Indy"},
+        ],
+    },
+    {
+        "id": 6,
+        "name": "pink",
+        "members": [
+            {"realname": "Raythar", "name": "Shalurdroth", "tag": "2867"},
+            {"realname": "Braveclue", "name": "Shiwneos", "tag": "7696"},
         ],
     },
 ]
 
+
 def get_match_by_id(match_id):
     import json
+
     try:
-        with open(f's3://lol-challenge/matches/{match_id}.json', 'r', transport_params=transport_params) as m:
+        with open(
+            f"s3://lol-challenge/matches/{match_id}.json",
+            "r",
+            transport_params=transport_params,
+        ) as m:
             match = json.load(m)
     except:
         match = lol_watcher.match.by_id(my_region, match_id)
-        with open(f's3://lol-challenge/matches/{match_id}.json', 'w', transport_params=transport_params) as m:
+        with open(
+            f"s3://lol-challenge/matches/{match_id}.json",
+            "w",
+            transport_params=transport_params,
+        ) as m:
             json.dump(match, m)
     return match
 
@@ -115,32 +136,43 @@ def get_league_data(summoner):
 @st.cache_data
 def get_league_data_by_summoner_id(summoner_id):
     import json
+
     try:
-        with open(f's3://lol-challenge/leagues/{summoner_id}.json', 'r', transport_params=transport_params) as m:
+        with open(
+            f"s3://lol-challenge/leagues/{summoner_id}.json",
+            "r",
+            transport_params=transport_params,
+        ) as m:
             league_data = json.load(m)
         return league_data
     except:
         league_data = lol_watcher.league.by_summoner(my_region, summoner_id)
         if not league_data:
             return []
-        with open(f's3://lol-challenge/leagues/{summoner_id}.json', 'w', transport_params=transport_params) as m:
+        with open(
+            f"s3://lol-challenge/leagues/{summoner_id}.json",
+            "w",
+            transport_params=transport_params,
+        ) as m:
             json.dump(league_data, m)
         return league_data
+
 
 @st.cache_data
 def get_avg_rank(match_dto):
     team_lps = []
     for participant in match_dto["info"]["participants"]:
-        summoner_id = participant['summonerId']
+        summoner_id = participant["summonerId"]
         import time
+
         # wait .02 seconds
-        
+
         league_data = get_league_data_by_summoner_id(summoner_id)
         for stats in league_data:
-            if stats['queueType'] == "RANKED_SOLO_5x5":
-                tier = stats['tier']
-                rank = stats['rank']
-                points = stats['leaguePoints']
+            if stats["queueType"] == "RANKED_SOLO_5x5":
+                tier = stats["tier"]
+                rank = stats["rank"]
+                points = stats["leaguePoints"]
                 team_lps.append(RANK_MAPPING[tier] + TIER_MAPPING[rank] + points)
     if not team_lps:
         return None
@@ -151,17 +183,18 @@ def get_rank_string_from_lp(lp):
     sorted_ranks = sorted(RANK_MAPPING.items(), key=lambda x: x[1])
     for k, v in sorted_ranks:
         if lp > v and lp < v + 400:
-            
+
             remaining_lp = lp - v
-            print(k,v,remaining_lp)
+            print(k, v, remaining_lp)
             tier = k
             sorted_tiers = sorted(TIER_MAPPING.items(), key=lambda x: x[1])
             for k2, v2 in sorted_tiers:
-                print(k2,v2)
+                print(k2, v2)
                 if remaining_lp > v2 and remaining_lp < v2 + 100:
                     print("found")
                     return f"{tier} {k2} {remaining_lp - v2}LP"
     return "UNRANKED"
+
 
 RANK_MAPPING = {
     "IRON": 0,
@@ -224,10 +257,19 @@ def get_kda_player_stats(match_dto, puuid):
             kills = participant["kills"]
             deaths = participant["deaths"]
             assists = participant["assists"]
-            max_cs_adv_on_lane_opponent = participant["challenges"]["maxCsAdvantageOnLaneOpponent"]
+            max_cs_adv_on_lane_opponent = participant["challenges"][
+                "maxCsAdvantageOnLaneOpponent"
+            ]
             gold_per_minute = participant["challenges"]["goldPerMinute"]
-            return (kills, deaths, assists, max_cs_adv_on_lane_opponent, gold_per_minute)
+            return (
+                kills,
+                deaths,
+                assists,
+                max_cs_adv_on_lane_opponent,
+                gold_per_minute,
+            )
     return None
+
 
 def get_team_kills(match_dto, team_id):
     for team in match_dto["info"]["teams"]:
@@ -265,15 +307,16 @@ def get_link(team_member):
 
 
 def get_duration_seconds(dto):
-    ts = dto['info']['gameEndTimestamp']
-    ts2 = dto['info']['gameStartTimestamp']
-    duration_seconds = ((ts-ts2)/1000)
+    ts = dto["info"]["gameEndTimestamp"]
+    ts2 = dto["info"]["gameStartTimestamp"]
+    duration_seconds = (ts - ts2) / 1000
     return duration_seconds
 
 
 def round_to_nearest_10_seconds(dt):
     return dt + datetime.timedelta(seconds=-(dt.second % 10))
-    
+
+
 @st.cache_data
 def get_data(timestamp):
     data = []
@@ -324,7 +367,13 @@ def get_data(timestamp):
                         win += 1
                     else:
                         loss += 1
-                    kill, death, assist, max_cs_adv_on_lane_opponent, gold_per_minute = get_kda_player_stats(dto, account["puuid"])
+                    (
+                        kill,
+                        death,
+                        assist,
+                        max_cs_adv_on_lane_opponent,
+                        gold_per_minute,
+                    ) = get_kda_player_stats(dto, account["puuid"])
                     kills += kill
                     deaths += death
                     assists += assist
@@ -346,7 +395,7 @@ def get_data(timestamp):
                             avg_ranks.append(avg_rank)
                     counter += 1
                 else:
-                    remake +=1
+                    remake += 1
             member_counter += 1
             wins.append(win)
             losses.append(loss)
@@ -365,7 +414,7 @@ def get_data(timestamp):
                 print(avg_team_rank)
                 print(int(avg_team_rank))
                 avg_team_rank_str = get_rank_string_from_lp(int(avg_team_rank))
-            
+
             if len(durations) == 0:
                 avg_duration = 0
             else:
@@ -424,17 +473,45 @@ def get_data(timestamp):
         # st.text(f"Winrate: {winrate}")
 
     df2 = pd.DataFrame(data).sort_values("avg_lp", ascending=False)
-    df2 = df2[['team', 'name', 'opgg', 'rank', 'lp', 'avg_lp', 'avg_rank', 'wins', 'losses', 'winrate', 'remakes', 'avg_duration', 'avg_kda', 'avg_kd', 'avg_kp', 'kills', 'deaths', 'assists', 'avg_gold_per_minute', 'last_match', 'avg_game_rank']]
+    df2 = df2[
+        [
+            "team",
+            "name",
+            "opgg",
+            "rank",
+            "lp",
+            "avg_lp",
+            "avg_rank",
+            "wins",
+            "losses",
+            "winrate",
+            "remakes",
+            "avg_duration",
+            "avg_kda",
+            "avg_kd",
+            "avg_kp",
+            "kills",
+            "deaths",
+            "assists",
+            "avg_gold_per_minute",
+            "last_match",
+            "avg_game_rank",
+        ]
+    ]
     return df2
 
+
 import time
+
 dt = datetime.datetime.now()
 dtr = round_to_nearest_10_seconds(dt)
 now_time_str = dtr.strftime("%Y-%m-%dT%H")
 
 t = st.empty()
 try:
-    df = pd.read_csv(open('s3://lol-challenge/data.csv', 'r', transport_params=transport_params))
+    df = pd.read_csv(
+        open("s3://lol-challenge/data.csv", "r", transport_params=transport_params)
+    )
     t.dataframe(df, column_config={"opgg": st.column_config.LinkColumn()})
 except:
     pass
@@ -444,10 +521,13 @@ def refresh_data():
     dt = datetime.datetime.now()
     ts = dt.astimezone(tz=ZoneInfo("US/Eastern")).strftime("%Y-%m-%dT%H:%M:%S")
     df1 = get_data(ts)
-    df1['updated_at'] = ts
+    df1["updated_at"] = ts
     t = st.empty()
     t.dataframe(df1, column_config={"opgg": st.column_config.LinkColumn()})
-    df1.to_csv(open('s3://lol-challenge/data.csv', 'wb', transport_params=transport_params), index=False)
+    df1.to_csv(
+        open("s3://lol-challenge/data.csv", "wb", transport_params=transport_params),
+        index=False,
+    )
 
 
 st.button("Refresh Data", on_click=refresh_data)
