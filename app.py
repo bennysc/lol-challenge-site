@@ -8,10 +8,12 @@ from zoneinfo import ZoneInfo
 
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
 
+RIOT_API_KEY = os.environ.get("RIOT_API_KEY")
 
-lol_watcher = LolWatcher(os.environ["RIOT_API_KEY"])
 
-riot_watcher = RiotWatcher(os.environ["RIOT_API_KEY"])
+lol_watcher = LolWatcher(RIOT_API_KEY)
+
+riot_watcher = RiotWatcher(RIOT_API_KEY)
 
 SPACES_KEY = os.environ.get("SPACES_KEY")
 SPACES_SECRET = os.environ.get("SPACES_SECRET")
@@ -89,7 +91,7 @@ teams = [
         "name": "turquoise",
         "members": [
             {"realname": "Surge", "name": "JSurge70onTwitch", "tag": "Stink"},
-            {"realname": "BP", "name": "Shueizryn", "tag": "6239"},
+            {"realname": "BP", "name": "SurgePoopPlug", "tag": "Fem"},
         ],
     },
     {
@@ -132,11 +134,14 @@ def get_account(name, tag):
 @st.cache_data
 def get_matches(puuid, timestamp):
     match_ids = lol_watcher.match.matchlist_by_puuid(
-        my_region, puuid, count=100, queue=420
+        my_region, puuid, count=100, start_time=1737504000
     )
     matches = []
     for match_id in match_ids:
-        matches.append(get_match_by_id(match_id))
+        match_rec = get_match_by_id(match_id)
+        queue_id = match_rec["info"]["queueId"]
+        if queue_id == 420:
+            matches.append(match_rec)
     return matches
 
 
@@ -379,6 +384,7 @@ def get_data(timestamp):
                     team = get_team(dto, account["puuid"])
                     team_kills = get_team_kills(dto, team)
                     winning_team = get_winning_team(dto)
+                    print(winning_team)
                     if team == winning_team:
                         win += 1
                     else:
