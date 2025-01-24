@@ -84,6 +84,22 @@ teams = [
             {"realname": "Braveclue", "name": "Shiwneos", "tag": "7696"},
         ],
     },
+    {
+        "id": 7,
+        "name": "turquoise",
+        "members": [
+            {"realname": "Surge", "name": "JSurge70onTwitch", "tag": "Stink"},
+            {"realname": "BP", "name": "Shueizryn", "tag": "6239"},
+        ],
+    },
+    {
+        "id": 8,
+        "name": "orange",
+        "members": [
+            {"realname": "Julian", "name": "Tek18128", "tag": "NA1"},
+            {"realname": "Draco", "name": "Tek18128", "tag": "NA1"},
+        ],
+    },
 ]
 
 
