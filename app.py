@@ -278,15 +278,12 @@ def get_kda_player_stats(match_dto, puuid):
             kills = participant["kills"]
             deaths = participant["deaths"]
             assists = participant["assists"]
-            max_cs_adv_on_lane_opponent = participant["challenges"][
-                "maxCsAdvantageOnLaneOpponent"
-            ]
+            
             gold_per_minute = participant["challenges"]["goldPerMinute"]
             return (
                 kills,
                 deaths,
                 assists,
-                max_cs_adv_on_lane_opponent,
                 gold_per_minute,
             )
     return None
@@ -374,7 +371,6 @@ def get_data(timestamp):
             kdas = []
             kds = []
             kps = []
-            max_cs_adv_on_lane_opponents = []
             gold_per_minutes = []
             counter = 0
             for dto in matches:
@@ -393,7 +389,6 @@ def get_data(timestamp):
                         kill,
                         death,
                         assist,
-                        max_cs_adv_on_lane_opponent,
                         gold_per_minute,
                     ) = get_kda_player_stats(dto, account["puuid"])
                     kills += kill
@@ -409,7 +404,7 @@ def get_data(timestamp):
                     kds.append(kd)
                     kdas.append(kda)
                     kps.append(kp)
-                    max_cs_adv_on_lane_opponents.append(max_cs_adv_on_lane_opponent)
+
                     gold_per_minutes.append(gold_per_minute)
                     if counter < 5 and member_counter == 0:
                         avg_rank = get_avg_rank(dto)
@@ -425,7 +420,7 @@ def get_data(timestamp):
             avg_kda = np.mean(kdas)
             avg_kd = np.mean(kds)
             avg_kp = np.mean(kps)
-            avg_max_cs_adv_on_lane_opponent = np.mean(max_cs_adv_on_lane_opponents)
+
             avg_gold_per_minute = np.mean(gold_per_minutes)
             wr = win / (win + loss) if win + loss > 0 else 0
             print(avg_ranks)
