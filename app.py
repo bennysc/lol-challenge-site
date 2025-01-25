@@ -59,7 +59,7 @@ teams = [
         "name": "green",
         "members": [
             {"realname": "Purgance", "name": "SAM IS BIG BODY", "tag": "TRASH"},
-            {"realname": "Dylan", "name": "SAMiSFaTTY", "tag": "4904"},
+            {"realname": "Dillon", "name": "SAMiSFaTTY", "tag": "4904"},
         ],
     },
     {
@@ -98,8 +98,8 @@ teams = [
         "id": 8,
         "name": "orange",
         "members": [
-            {"realname": "Julian", "name": "Tek18128", "tag": "NA1"},
-            {"realname": "Draco", "name": "Tek18128", "tag": "NA1"},
+            {"realname": "open1", "name": "Tek18128", "tag": "NA1"},
+            {"realname": "open2", "name": "Tek18128", "tag": "NA1"},
         ],
     },
 ]
