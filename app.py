@@ -82,8 +82,8 @@ teams = [
         "id": 6,
         "name": "pink",
         "members": [
-            {"realname": "Raythar", "name": "Shalurdroth", "tag": "2867"},
-            {"realname": "Braveclue", "name": "Shiwneos", "tag": "7696"},
+            {"realname": "Raythar", "name": "KnockKnock", "tag": "Jorts"},
+            {"realname": "Braveclue", "name": "WhosThere", "tag": "Jorts"},
         ],
     },
     {
