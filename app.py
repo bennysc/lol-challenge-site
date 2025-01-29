@@ -40,7 +40,7 @@ st.title("LoL Challenge")
 teams = [
     {
         "id": 1,
-        "name": "blue",
+        "name": "Bouncing in the Bounce House 🏰",
         "members": [
             {"realname": "Benny", "name": "festivus", "tag": "feats"},
             {"realname": "EJ", "name": "TonkaTank420", "tag": "Tank1"},
@@ -48,7 +48,7 @@ teams = [
     },
     {
         "id": 2,
-        "name": "red",
+        "name": "cc treeshes 👫",
         "members": [
             {"realname": "Triston", "name": "Shadow Daddy", "tag": "Bro"},
             {"realname": "Calvin", "name": "Void Mommy", "tag": "Sis"},
@@ -56,7 +56,7 @@ teams = [
     },
     {
         "id": 3,
-        "name": "green",
+        "name": "Fat Boy Sam™ 🎅",
         "members": [
             {"realname": "Purgance", "name": "SAM IS BIG BODY", "tag": "TRASH"},
             {"realname": "Dillon", "name": "SAMiSFaTTY", "tag": "4904"},
@@ -64,7 +64,7 @@ teams = [
     },
     {
         "id": 4,
-        "name": "yellow",
+        "name": "Little Man Vods 🥈",
         "members": [
             {"realname": "Sam", "name": "PikeHigh2014", "tag": "317"},
             {"realname": "Brandon", "name": "StephenUllrich", "tag": "LOVER"},
@@ -72,7 +72,7 @@ teams = [
     },
     {
         "id": 5,
-        "name": "purple",
+        "name": "Pike Bros On Top 🐟",
         "members": [
             {"realname": "Downzee", "name": "Wanariceciab", "tag": "7336"},
             {"realname": "Snivel", "name": "ASPOnTop", "tag": "Indy"},
@@ -80,7 +80,7 @@ teams = [
     },
     {
         "id": 6,
-        "name": "pink",
+        "name": "Canadian Tuxedos 👖",
         "members": [
             {"realname": "Raythar", "name": "KnockKnock", "tag": "Jorts"},
             {"realname": "Braveclue", "name": "WhosThere", "tag": "Jorts"},
@@ -88,20 +88,12 @@ teams = [
     },
     {
         "id": 7,
-        "name": "turquoise",
+        "name": "Femboy Poop Plug 👯‍♂️",
         "members": [
             {"realname": "Surge", "name": "JSurge70onTwitch", "tag": "Stink"},
             {"realname": "BP", "name": "SurgePoopPlug", "tag": "Fem"},
         ],
-    },
-    {
-        "id": 8,
-        "name": "orange",
-        "members": [
-            {"realname": "open1", "name": "Tek18128", "tag": "NA1"},
-            {"realname": "open2", "name": "Tek18128", "tag": "NA1"},
-        ],
-    },
+    }
 ]
 
 
@@ -469,7 +461,7 @@ def get_data(timestamp):
             est_time = "No matches"
         avg_lp = sum([d["lp"] for d in teamdata]) / len(teamdata)
         avg_rank_string = get_rank_string_from_lp(int(avg_lp))
-        team_description = f"{teamdata[0]['name']} and {teamdata[1]['name']}"
+        team_description = teamdata['name']
         print(avg_team_rank_str)
         for d in teamdata:
             d["avg_lp"] = avg_lp
