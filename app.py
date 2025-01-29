@@ -270,12 +270,17 @@ def get_kda_player_stats(match_dto, puuid):
             kills = participant["kills"]
             deaths = participant["deaths"]
             assists = participant["assists"]
+            total_dmg_dealt_to_champions = participant["totalDamageDealtToChampions"]
+            enemy_missing_pings = participant["enemyMissingPings"]
             
             gold_per_minute = participant["challenges"]["goldPerMinute"]
             return (
                 kills,
                 deaths,
                 assists,
+                total_dmg_dealt_to_champions,
+                enemy_missing_pings,
+                
                 gold_per_minute,
             )
     return None
@@ -361,9 +366,11 @@ def get_data(timestamp):
             kills = 0
             deaths = 0
             assists = 0
+            sum_total_enemy_missing_pings = 0
             kdas = []
             kds = []
             kps = []
+            dmgs = []
             gold_per_minutes = []
             counter = 0
             for dto in matches:
@@ -382,11 +389,14 @@ def get_data(timestamp):
                         kill,
                         death,
                         assist,
+                        total_dmg_dealt_to_champions,
+                        enemy_missing_pings,
                         gold_per_minute,
                     ) = get_kda_player_stats(dto, account["puuid"])
                     kills += kill
                     deaths += death
                     assists += assist
+                    sum_total_enemy_missing_pings += enemy_missing_pings
                     if death > 0:
                         kda = (kill + assist) / death
                         kd = kill / death
@@ -394,6 +404,7 @@ def get_data(timestamp):
                         kda = kill + assist
                         kd = kill
                     kp = (kill + assist) / max(team_kills, 1)
+                    dmgs.append(total_dmg_dealt_to_champions)
                     kds.append(kd)
                     kdas.append(kda)
                     kps.append(kp)
@@ -413,6 +424,7 @@ def get_data(timestamp):
             avg_kda = np.mean(kdas)
             avg_kd = np.mean(kds)
             avg_kp = np.mean(kps)
+            avg_dmg = np.mean(dmgs)
 
             avg_gold_per_minute = np.mean(gold_per_minutes)
             wr = win / (win + loss) if win + loss > 0 else 0
@@ -444,9 +456,11 @@ def get_data(timestamp):
                     "avg_kda": avg_kda,
                     "avg_kd": avg_kd,
                     "avg_kp": avg_kp,
+                    "avg_dmg": avg_dmg,
                     "kills": kills,
                     "deaths": deaths,
                     "assists": assists,
+                    "enemy_missing_pings": sum_total_enemy_missing_pings,
                     "avg_gold_per_minute": avg_gold_per_minute,
                 }
             )
