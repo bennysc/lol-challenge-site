@@ -461,7 +461,7 @@ def get_data(timestamp):
             est_time = "No matches"
         avg_lp = sum([d["lp"] for d in teamdata]) / len(teamdata)
         avg_rank_string = get_rank_string_from_lp(int(avg_lp))
-        team_description = teamdata['name']
+        team_description = team['name']
         print(avg_team_rank_str)
         for d in teamdata:
             d["avg_lp"] = avg_lp
