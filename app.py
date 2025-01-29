@@ -371,6 +371,7 @@ def get_data(timestamp):
             kds = []
             kps = []
             dmgs = []
+            all_total_enemy_missing_pings = []
             gold_per_minutes = []
             counter = 0
             for dto in matches:
@@ -405,6 +406,7 @@ def get_data(timestamp):
                         kd = kill
                     kp = (kill + assist) / max(team_kills, 1)
                     dmgs.append(total_dmg_dealt_to_champions)
+                    all_total_enemy_missing_pings.append(enemy_missing_pings)
                     kds.append(kd)
                     kdas.append(kda)
                     kps.append(kp)
@@ -424,7 +426,8 @@ def get_data(timestamp):
             avg_kda = np.mean(kdas)
             avg_kd = np.mean(kds)
             avg_kp = np.mean(kps)
-            avg_dmg = np.mean(dmgs)
+            avg_dmg = int(np.mean(dmgs))
+            avg_missing_pings = int(np.mean(all_total_enemy_missing_pings))
 
             avg_gold_per_minute = np.mean(gold_per_minutes)
             wr = win / (win + loss) if win + loss > 0 else 0
@@ -461,6 +464,7 @@ def get_data(timestamp):
                     "deaths": deaths,
                     "assists": assists,
                     "enemy_missing_pings": sum_total_enemy_missing_pings,
+                    "avg_missing_pings": avg_missing_pings,
                     "avg_gold_per_minute": avg_gold_per_minute,
                 }
             )
@@ -519,6 +523,7 @@ def get_data(timestamp):
             "deaths",
             "assists",
             "enemy_missing_pings",
+            "avg_missing_pings",
             "avg_gold_per_minute",
             "last_match",
             "avg_game_rank",
