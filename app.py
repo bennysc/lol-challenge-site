@@ -344,6 +344,7 @@ def get_data(timestamp):
         avg_team_rank_str = ""
         member_counter = 0
         avg_ranks = []
+        team_description = team['name']
         for member in team["members"]:
             fullname = get_fullname(member["name"], member["tag"])
             realname = member["realname"]
@@ -461,7 +462,7 @@ def get_data(timestamp):
             est_time = "No matches"
         avg_lp = sum([d["lp"] for d in teamdata]) / len(teamdata)
         avg_rank_string = get_rank_string_from_lp(int(avg_lp))
-        team_description = team['name']
+        
         print(avg_team_rank_str)
         for d in teamdata:
             d["avg_lp"] = avg_lp
