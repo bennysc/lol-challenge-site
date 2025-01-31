@@ -134,7 +134,7 @@ def get_account(name, tag):
 @st.cache_data
 def get_matches(puuid, timestamp, starttime = 1737504000):
     match_ids = lol_watcher.match.matchlist_by_puuid(
-        my_region, puuid, count=100, start_time=1737504000
+        my_region, puuid, count=100, start_time=starttime
     )
     matches = []
     for match_id in match_ids:
