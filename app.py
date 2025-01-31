@@ -40,7 +40,7 @@ st.title("LoL Challenge")
 teams = [
     {
         "id": 1,
-        "name": "Bouncing in the Bounce House 🏰",
+        "name": "BANNED RIP",
         "members": [
             {"realname": "Benny", "name": "festivus", "tag": "feats"},
             {"realname": "EJ", "name": "TonkaTank420", "tag": "Tank1"},
@@ -80,7 +80,7 @@ teams = [
     },
     {
         "id": 6,
-        "name": "Canadian Tuxedos 👖",
+        "name": "Knights who say Ni 🛡️",
         "members": [
             {"realname": "Raythar", "name": "KnockKnock", "tag": "Jorts"},
             {"realname": "Braveclue", "name": "WhosThere", "tag": "Jorts"},
@@ -93,7 +93,15 @@ teams = [
             {"realname": "Surge", "name": "JSurge70onTwitch", "tag": "Stink"},
             {"realname": "BP", "name": "SurgePoopPlug", "tag": "Fem"},
         ],
-    }
+    },
+    {
+        "id": 7,
+        "name": "Bouncing in the Bounce House 🏰",
+        "members": [
+            {"realname": "Benny", "name": "training season", "tag": "dua", "starttime" :  1738290600},
+            {"realname": "EJ", "name": "Time2Fish", "tag": "FishU", "starttime" :  1738290600},
+        ],
+    },
 ]
 
 
@@ -124,7 +132,7 @@ def get_account(name, tag):
 
 
 @st.cache_data
-def get_matches(puuid, timestamp):
+def get_matches(puuid, timestamp, starttime = 1737504000):
     match_ids = lol_watcher.match.matchlist_by_puuid(
         my_region, puuid, count=100, start_time=1737504000
     )
@@ -358,7 +366,8 @@ def get_data(timestamp):
             dt = datetime.datetime.now()
             dtr = round_to_nearest_10_seconds(dt)
             now_time_str = dtr.strftime("%Y-%m-%dT%H:%M:%S")
-            matches = get_matches(account["puuid"], now_time_str)
+            starttime = member.get("starttime", 1737504000)
+            matches = get_matches(account["puuid"], now_time_str, starttime)
             win = 0
             loss = 0
             remake = 0
