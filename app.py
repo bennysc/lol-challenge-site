@@ -39,14 +39,6 @@ st.title("LoL Challenge")
 
 teams = [
     {
-        "id": 1,
-        "name": "BANNED RIP",
-        "members": [
-            {"realname": "Benny", "name": "festivus", "tag": "feats"},
-            {"realname": "EJ", "name": "TonkaTank420", "tag": "Tank1"},
-        ],
-    },
-    {
         "id": 2,
         "name": "cc treeshes 👫",
         "members": [
@@ -98,8 +90,8 @@ teams = [
         "id": 7,
         "name": "Bouncing in the Bounce House 🏰",
         "members": [
-            {"realname": "Benny", "name": "training season", "tag": "dua", "starttime" :  1738290600},
-            {"realname": "EJ", "name": "Time2Fish", "tag": "FishU", "starttime" :  1738290600},
+            {"realname": "Benny", "name": "spider monkey", "tag": "grubs", "starttime" :  1738418400},
+            {"realname": "EJ", "name": "MountainMike", "tag": "Mount", "starttime" :  1738418400},
         ],
     },
 ]
